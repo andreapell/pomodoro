@@ -1,6 +1,4 @@
 const { App } = require('@slack/bolt');
-const util = require('util');
-const setTimeoutPromise = util.promisify(setTimeout);
 
 // Initializes your app with your bot token and signing secret
 const app = new App({
@@ -8,18 +6,33 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
-// Listens to incoming messages that contain "hello"
+var currentTimeout;
 
-app.message('start break', ({ message, say }) => {
-  // say() sends a message to the channel where the event was triggered
-  say(`Ok <@${message.user}>, setting a timer for a break!`);
-  setTimeoutPromise(300000, 'foobar').then((value) => {
-    // value === 'foobar' (passing values is optional)
-    // This is executed after about 40 milliseconds.
-    say(`Go back to work <@${message.user}>!`);
-  });
+app.message('start pomodoro', ({ message, say }) => {
+  say(`Ok <@${message.user}>, setting a timer for a Pomodoro!`);
+  currentTimeout = setTimeout(() => {
+    say(`Time for a break <@${message.user}>!`);
+  },1500000)
 });
 
+app.message('start break', ({ message, say }) => {
+  say(`Ok <@${message.user}>, setting a timer for a break!`);
+  currentTimeout = setTimeout(() => {
+    say(`Go back to work <@${message.user}>!`);
+  },300000)
+});
+
+app.message('start long break', ({ message, say }) => {
+  say(`Ok <@${message.user}>, setting a timer for a long break!`);
+  currentTimeout = setTimeout(() => {
+    say(`Go back to work <@${message.user}>!`);
+  },900000)
+});
+
+app.message('stop', ({ message, say }) => {
+  clearTimeout(currentTimeout)
+  say(`Your timer was stopped <@${message.user}>!`);
+});
 
 (async () => {
   // Start your app
